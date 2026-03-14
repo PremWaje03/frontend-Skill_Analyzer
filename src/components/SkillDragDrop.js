@@ -8,6 +8,7 @@ import {
 
 import "../styles/SkillDragDrop.css";
 import { analyzeSkills } from "../services/skillService";
+
 /* -------------------- Initial Skills -------------------- */
 
 const initialSkills = [
@@ -99,6 +100,9 @@ function SkillDragDrop() {
   const [master, setMaster] = useState([]);
   const [future, setFuture] = useState([]);
   const [activeSkill, setActiveSkill] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+
+  /* -------------------- Drag Handlers -------------------- */
 
   const handleDragStart = (event) => {
     setActiveSkill(event.active.id);
@@ -127,7 +131,7 @@ function SkillDragDrop() {
     }
   };
 
-  /* Remove skill from box */
+  /* -------------------- Remove Skill -------------------- */
 
   const removeSkill = (section, skill) => {
     if (section === "learning") {
@@ -145,9 +149,9 @@ function SkillDragDrop() {
     setAvailable((prev) => [...prev, skill]);
   };
 
-  /* Analyze Button */
+  /* -------------------- Analyze Skills -------------------- */
 
-  const handleAnalyze = async () => {
+  const analyzeUserSkills = async () => {
     const data = {
       learning,
       master,
@@ -156,16 +160,15 @@ function SkillDragDrop() {
 
     try {
       const result = await analyzeSkills(data);
-
-      console.log("AI Result:", result);
+      setAnalysis(result);
     } catch (error) {
-      console.error("Failed to analyze skills");
+      console.error("Analysis error:", error);
     }
   };
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      {/* Page Header */}
+      {/* Header */}
 
       <div className="hero-section">
         <h1>SkillVista AI</h1>
@@ -174,7 +177,7 @@ function SkillDragDrop() {
         </p>
       </div>
 
-      {/* Skill Categories */}
+      {/* Categories */}
 
       <div className="category-container">
         {skillCategories.map((cat) => (
@@ -194,7 +197,7 @@ function SkillDragDrop() {
         ))}
       </div>
 
-      {/* Drop Sections */}
+      {/* Drop Zones */}
 
       <div className="drop-container">
         <DroppableBox
@@ -222,16 +225,36 @@ function SkillDragDrop() {
       {/* Analyze Button */}
 
       <div className="analyze-container">
-        <button onClick={handleAnalyze} className="analyze-btn">
+        <button onClick={analyzeUserSkills} className="analyze-btn">
           Analyze My Skills
         </button>
       </div>
 
-      {/* Dashboard Section */}
+      {/* Dashboard */}
 
       <div className="dashboard-placeholder">
         <h3>Skill Analysis Dashboard</h3>
-        <p>Your AI-generated insights and learning roadmap will appear here.</p>
+
+        {analysis ? (
+          <div className="analysis-result">
+            <h4>Recommended Career Path</h4>
+            <p>{analysis.recommended_path}</p>
+
+            <h4>Skill Gap</h4>
+            <ul>
+              {analysis.skill_gap.map((skill, index) => (
+                <li key={index}>{skill}</li>
+              ))}
+            </ul>
+
+            <h4>Confidence</h4>
+            <p>{analysis.confidence * 100}%</p>
+          </div>
+        ) : (
+          <p>
+            Your AI-generated insights and learning roadmap will appear here.
+          </p>
+        )}
       </div>
 
       {/* Drag Overlay */}
